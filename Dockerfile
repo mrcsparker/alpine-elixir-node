@@ -20,7 +20,7 @@ RUN \
     chmod -R 777 /opt/app
 
 RUN apk add --no-cache curl make gcc g++ python linux-headers binutils-gold gnupg libstdc++ && \
-  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys \
+  gpg --keyserver ipv4.pool.sks-keyservers.net --recv-keys \
     94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
     FD3A5288F042B6850C66B31F09FE44734EB7990E \
     71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
@@ -41,7 +41,7 @@ RUN apk add --no-cache curl make gcc g++ python linux-headers binutils-gold gnup
     npm install -g npm@${NPM_VERSION} && \
     find /usr/lib/node_modules/npm -name test -o -name .bin -type d | xargs rm -rf && \
     if [ -n "$YARN_VERSION" ]; then \
-      gpg --keyserver ha.pool.sks-keyservers.net --recv-keys \
+      gpg --keyserver ipv4.pool.sks-keyservers.net --recv-keys \
         6A010C5166006599AA17F08146C2130DFD2497F5 && \
       curl -sSL -O https://yarnpkg.com/${YARN_VERSION}.tar.gz -O https://yarnpkg.com/${YARN_VERSION}.tar.gz.asc && \
       gpg --batch --verify ${YARN_VERSION}.tar.gz.asc ${YARN_VERSION}.tar.gz && \
@@ -60,4 +60,6 @@ RUN apk add --no-cache curl make gcc g++ python linux-headers binutils-gold gnup
 ENV PATH=/opt/app/apps/sila_web/assets/node_modules/.bin:$PATH \
   HOME=/opt/app
 
-RUN mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phx_new.ez
+WORKDIR /opt/app
+
+CMD ["/bin/sh"]
