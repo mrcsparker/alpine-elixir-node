@@ -1,4 +1,4 @@
-FROM bitwalker/alpine-elixir:latest
+FROM bitwalker/alpine-elixir:1.5.2
 
 MAINTAINER Chris Parker <mrcsparker@gmail.com>
 
@@ -6,18 +6,15 @@ MAINTAINER Chris Parker <mrcsparker@gmail.com>
 # is updated with the current date. It will force refresh of all
 # of the base images and things like `apt-get update` won't be using
 # old cached versions when the Dockerfile is built.
-ENV REFRESHED_AT=2017-07-26 \
+ENV REFRESHED_AT=2017-10-26 \
     # Set this so that CTRL+G works properly
     TERM=xterm
 
 ENV VERSION=v8.2.1 NPM_VERSION=5 YARN_VERSION=latest
 
-# For base builds
-ENV CONFIG_FLAGS="--fully-static --without-npm" DEL_PKGS="libstdc++" RM_DIRS=/usr/include
+WORKDIR /
 
-RUN \
-    mkdir -p /opt/app && \
-    chmod -R 777 /opt/app
+ENV HOME=/root
 
 RUN apk add --no-cache curl make gcc g++ python linux-headers binutils-gold gnupg libstdc++ && \
   gpg --keyserver ipv4.pool.sks-keyservers.net --recv-keys \
@@ -37,7 +34,6 @@ RUN apk add --no-cache curl make gcc g++ python linux-headers binutils-gold gnup
   make -j$(getconf _NPROCESSORS_ONLN) && \
   make install && \
   cd / && \
-  if [ -z "$CONFIG_FLAGS" ]; then \
     npm install -g npm@${NPM_VERSION} && \
     find /usr/lib/node_modules/npm -name test -o -name .bin -type d | xargs rm -rf && \
     if [ -n "$YARN_VERSION" ]; then \
@@ -51,15 +47,9 @@ RUN apk add --no-cache curl make gcc g++ python linux-headers binutils-gold gnup
       ln -s /usr/local/share/yarn/bin/yarnpkg /usr/local/bin/ && \
       rm ${YARN_VERSION}.tar.gz*; \
     fi; \
-  fi && \
   apk del curl make gcc g++ python linux-headers binutils-gold gnupg ${DEL_PKGS} && \
   rm -rf ${RM_DIRS} /node-${VERSION}* /usr/share/man /tmp/* /var/cache/apk/* \
     /root/.npm /root/.node-gyp /root/.gnupg /usr/lib/node_modules/npm/man \
     /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html /usr/lib/node_modules/npm/scripts
-
-ENV PATH=/opt/app/apps/sila_web/assets/node_modules/.bin:$PATH \
-  HOME=/opt/app
-
-WORKDIR /opt/app
 
 CMD ["/bin/sh"]
